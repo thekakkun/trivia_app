@@ -1,3 +1,5 @@
+from http.client import HTTPException
+import json
 import os
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -8,6 +10,16 @@ from models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
 
+
+def paginate(items, args):
+    page = args.get('page', 1, type=int)
+
+    page_start = (page-1) * QUESTIONS_PER_PAGE
+    page_end = page_start + QUESTIONS_PER_PAGE
+
+    return items[page_start:page_end]
+
+
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
@@ -16,10 +28,19 @@ def create_app(test_config=None):
     """
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     """
+    cors = CORS(app, origins="*")
+    # cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
     """
     @TODO: Use the after_request decorator to set Access-Control-Allow
     """
+    @app.after_request
+    def after_request(response):
+        response.headers.add('Access-Control-Allow-Headers',
+                             'Content-Type,Authorization,true')
+        response.headers.add('Access-Control-Allow-Methods',
+                             'GET,PUT,POST,DELETE,OPTIONS')
+        return response
 
     """
     @TODO:
@@ -27,6 +48,16 @@ def create_app(test_config=None):
     for all available categories.
     """
 
+    @app.route('/categories', methods=['GET'])
+    def get_categories():
+        try:
+            return jsonify({
+                'success': True,
+                'categories': [cat.format() for cat in Category.query.all()]
+            })
+
+        except:
+            abort(422)
 
     """
     @TODO:
@@ -40,6 +71,25 @@ def create_app(test_config=None):
     ten questions per page and pagination at the bottom of the screen for three pages.
     Clicking on the page numbers should update the questions.
     """
+    @app.route('/questions', methods=['GET'])
+    def get_questions():
+        all_questions = Question.query.order_by('id').all()
+
+        try:
+            questions = paginate(all_questions, request.args)
+
+            if not questions:
+                abort(404)
+
+            return jsonify({
+                'succcess': True,
+                'questions': [question.format() for question in questions],
+                'total_questions': len(all_questions),
+                'categories': [cat.type for cat in Category.query.all()],
+            })
+
+        except Exception as e:
+            abort(e.code) if e.code else abort(422)
 
     """
     @TODO:
@@ -99,4 +149,3 @@ def create_app(test_config=None):
     """
 
     return app
-

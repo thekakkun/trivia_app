@@ -52,7 +52,8 @@ def create_app(test_config=None):
         try:
             return jsonify({
                 'success': True,
-                'categories': [cat.format() for cat in Category.query.all()]
+                'categories': {str(cat.id): cat.type
+                               for cat in Category.query.all()}
             })
 
         except:
@@ -85,7 +86,8 @@ def create_app(test_config=None):
                 'questions': [question.format() for question in questions],
                 'total_questions': len(all_questions),
                 'current_category': None,
-                'categories': [cat.type for cat in Category.query.all()]
+                'categories': {str(cat.id): cat.type
+                               for cat in Category.query.all()}
             })
 
         except Exception as e:
@@ -149,7 +151,8 @@ def create_app(test_config=None):
                     'questions': [question.format() for question in questions],
                     'total_questions': len(matching_questions),
                     'current_category': None,
-                    'categories': [cat.type for cat in Category.query.all()],
+                    'categories': {str(cat.id): cat.type
+                               for cat in Category.query.all()}
                 })
 
             else:
@@ -172,7 +175,6 @@ def create_app(test_config=None):
     @app.route('/categories/<int:cat_id>/questions', methods=['GET'])
     def get_cat_questions(cat_id):
         try:
-            cat_id += 1
             matching_questions = Question.query.filter(
                 Question.category == cat_id).all()
             questions = paginate(matching_questions, request.args)
@@ -182,7 +184,8 @@ def create_app(test_config=None):
                 'questions': [question.format() for question in questions],
                 'total_questions': len(matching_questions),
                 'current_category': Category.query.get(cat_id).type,
-                'categories': [cat.type for cat in Category.query.all()]
+                'categories': {str(cat.id): cat.type
+                               for cat in Category.query.all()}
 
             })
 

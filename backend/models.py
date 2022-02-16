@@ -1,7 +1,8 @@
-import os
-from sqlalchemy import Column, String, Integer, create_engine
-from flask_sqlalchemy import SQLAlchemy
 import json
+import os
+
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Column, Integer, String, create_engine
 
 user = 'postgres'
 password = 'abc'

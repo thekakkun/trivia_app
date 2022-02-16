@@ -1,12 +1,12 @@
-from http.client import HTTPException
 import json
 import os
-from flask import Flask, request, abort, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from flask_cors import CORS
 import random
+from http.client import HTTPException
 
-from models import setup_db, Question, Category
+from flask import Flask, abort, jsonify, request
+from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
+from models import Category, Question, setup_db
 
 QUESTIONS_PER_PAGE = 10
 
@@ -29,7 +29,6 @@ def create_app(test_config=None):
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     """
     cors = CORS(app, origins="*")
-    # cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
     """
     @TODO: Use the after_request decorator to set Access-Control-Allow
@@ -85,7 +84,8 @@ def create_app(test_config=None):
                 'succcess': True,
                 'questions': [question.format() for question in questions],
                 'total_questions': len(all_questions),
-                'categories': [cat.type for cat in Category.query.all()],
+                'current_category': None,
+                'categories': [cat.type for cat in Category.query.all()]
             })
 
         except Exception as e:
@@ -98,6 +98,20 @@ def create_app(test_config=None):
     TEST: When you click the trash icon next to a question, the question will be removed.
     This removal will persist in the database and when you refresh the page.
     """
+
+    @app.route('/questions/<int:question_id>', methods=['GET'])
+    def delete_question(question_id):
+        try:
+            question = Question.query.get(question_id)
+
+            if not question:
+                abort(404)
+            else:
+                question.delete()
+                return get_questions()
+
+        except Exception as e:
+            abort(e.code) if e.code else abort(422)
 
     """
     @TODO:
@@ -120,6 +134,32 @@ def create_app(test_config=None):
     only question that include that string within their question.
     Try using the word "title" to start.
     """
+    @app.route('/questions', methods=['POST'])
+    def add_question():
+        try:
+            content = request.json
+            if 'searchTerm' in content:
+                term = content.get('searchTerm')
+                matching_questions = Question.query.filter(
+                    Question.question.ilike(f'%{term}%')).all()
+                questions = paginate(matching_questions, request.args)
+
+                return jsonify({
+                    'succcess': True,
+                    'questions': [question.format() for question in questions],
+                    'total_questions': len(matching_questions),
+                    'current_category': None,
+                    'categories': [cat.type for cat in Category.query.all()],
+                })
+
+            else:
+                question = Question(**content)
+                question.insert()
+
+                return get_questions()
+
+        except:
+            abort(422)
 
     """
     @TODO:
@@ -129,6 +169,25 @@ def create_app(test_config=None):
     categories in the left column will cause only questions of that
     category to be shown.
     """
+    @app.route('/categories/<int:cat_id>/questions', methods=['GET'])
+    def get_cat_questions(cat_id):
+        try:
+            cat_id += 1
+            matching_questions = Question.query.filter(
+                Question.category == cat_id).all()
+            questions = paginate(matching_questions, request.args)
+
+            return jsonify({
+                'succcess': True,
+                'questions': [question.format() for question in questions],
+                'total_questions': len(matching_questions),
+                'current_category': Category.query.get(cat_id).type,
+                'categories': [cat.type for cat in Category.query.all()]
+
+            })
+
+        except:
+            abort(422)
 
     """
     @TODO:

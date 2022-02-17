@@ -51,7 +51,6 @@ def create_app(test_config=None):
     def get_categories():
         try:
             return jsonify({
-                'success': True,
                 'categories': {str(cat.id): cat.type
                                for cat in Category.query.all()}
             })
@@ -82,7 +81,6 @@ def create_app(test_config=None):
                 abort(404)
 
             return jsonify({
-                'succcess': True,
                 'questions': [question.format() for question in questions],
                 'total_questions': len(all_questions),
                 'current_category': None,
@@ -101,7 +99,7 @@ def create_app(test_config=None):
     This removal will persist in the database and when you refresh the page.
     """
 
-    @app.route('/questions/<int:question_id>', methods=['GET'])
+    @app.route('/questions/<int:question_id>', methods=['DELETE'])
     def delete_question(question_id):
         try:
             question = Question.query.get(question_id)
@@ -110,7 +108,7 @@ def create_app(test_config=None):
                 abort(404)
             else:
                 question.delete()
-                return get_questions()
+                return jsonify({})
 
         except Exception as e:
             abort(e.code) if e.code else abort(422)
@@ -147,7 +145,6 @@ def create_app(test_config=None):
                 questions = paginate(matching_questions, request.args)
 
                 return jsonify({
-                    'succcess': True,
                     'questions': [question.format() for question in questions],
                     'total_questions': len(matching_questions),
                     'current_category': None,
@@ -180,7 +177,6 @@ def create_app(test_config=None):
             questions = paginate(matching_questions, request.args)
 
             return jsonify({
-                'succcess': True,
                 'questions': [question.format() for question in questions],
                 'total_questions': len(matching_questions),
                 'current_category': Category.query.get(cat_id).type,
@@ -235,5 +231,29 @@ def create_app(test_config=None):
     Create error handlers for all expected errors
     including 404 and 422.
     """
+
+    @app.errorhandler(400)
+    def bad_request(e):
+        return jsonify({
+            'code': e.code,
+            'description': e.description,
+            'name': e.name
+        })
+
+    @app.errorhandler(404)
+    def not_found(e):
+        return jsonify({
+            'code': e.code,
+            'description': e.description,
+            'name': e.name
+        })
+
+    @app.errorhandler(405)
+    def method_not_allowed(e):
+        return jsonify({
+            'code': e.code,
+            'description': e.description,
+            'name': e.name
+        })
 
     return app

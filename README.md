@@ -63,6 +63,8 @@ Get a list of the categories questions can belong in.
   }
   ```
 
+---
+
 #### `GET /questions?page={integer}`
 
 Get a list of questions.
@@ -100,6 +102,8 @@ Get a list of questions.
   }
   ```
 
+---
+
 #### `DELETE /questions/{question_id}`
 
 Delete the specified question.
@@ -108,6 +112,8 @@ Delete the specified question.
 
 - Request: `curl -X DELETE http:127.0.0.1:5000/questions/1`
 - Response: An empty json object will be returned if successful.
+
+---
 
 #### `POST /questions`
 
@@ -166,7 +172,7 @@ Delete the specified question.
       "category": 4,
       "difficulty": 2,
       "id": 5,
-      "question": "Whose autobiography is entitled "I Know Why the Caged Bird Sings"?"
+      "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
       },
       ...
   ],
@@ -195,13 +201,15 @@ Delete the specified question.
       "category": 4,
       "difficulty": 2,
       "id": 5,
-      "question": "Whose autobiography is entitled "I Know Why the Caged Bird Sings"?"
+      "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
       },
       ...
   ],
   "total_questions": 11
   }
   ```
+
+---
 
 #### `GET /categories/{category_id}/questions`
 
@@ -239,6 +247,8 @@ Get a list of questions based on the specified category.
   "total_questions": 3
   }
   ```
+
+---
 
 #### `POST /quizzes`
 

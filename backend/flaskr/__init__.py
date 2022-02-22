@@ -172,6 +172,10 @@ def create_app(test_config=None):
     @app.route('/categories/<int:cat_id>/questions', methods=['GET'])
     def get_cat_questions(cat_id):
         try:
+            cat = Category.query.get(cat_id)
+            if not cat:
+                abort(404)
+
             matching_questions = Question.query.filter(
                 Question.category == cat_id).all()
             questions = paginate(matching_questions, request.args)
@@ -185,8 +189,8 @@ def create_app(test_config=None):
 
             })
 
-        except:
-            abort(422)
+        except Exception as e:
+            abort(e.code) if e.code else abort(422)
 
     """
     @TODO:
@@ -232,28 +236,28 @@ def create_app(test_config=None):
     including 404 and 422.
     """
 
-    @app.errorhandler(400)
-    def bad_request(e):
-        return jsonify({
-            'code': e.code,
-            'description': e.description,
-            'name': e.name
-        })
-
     @app.errorhandler(404)
     def not_found(e):
-        return jsonify({
+        return (jsonify({
             'code': e.code,
             'description': e.description,
             'name': e.name
-        })
+        }), 404)
 
     @app.errorhandler(405)
     def method_not_allowed(e):
-        return jsonify({
+        return (jsonify({
             'code': e.code,
             'description': e.description,
             'name': e.name
-        })
+        }), 405)
+
+    @app.errorhandler(422)
+    def unprocessable(e):
+        return (jsonify({
+            'code': e.code,
+            'description': e.description,
+            'name': e.name
+        }), 422)
 
     return app

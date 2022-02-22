@@ -1,49 +1,273 @@
-# API Development and Documentation Final Project
+# Trivia App
 
-## Trivia App
+A project for [Udacity"s Full Stack Web Developer Nanodegree Program](https://www.udacity.com/course/full-stack-web-developer-nanodegree--nd0044), Part 2: API Development and Documentation.
 
-Udacity is invested in creating bonding experiences for its employees and students. A bunch of team members got the idea to hold trivia on a regular basis and created a webpage to manage the trivia app and play the game, but their API experience is limited and still needs to be built out.
+Check out the [original repo](https://github.com/udacity/cd0037-API-Development-and-Documentation-project) for more information on the project, or [see the rest of the projects completed for the nanodegree](https://github.com/thekakkun/udacity_projects).
 
-That's where you come in! Help them finish the trivia app so they can start holding trivia and seeing who's the most knowledgeable of the bunch. The application must:
+## Tech Stack (Dependencies)
 
-1. Display questions - both all questions and by category. Questions should show the question, category and difficulty rating by default and can show/hide the answer.
-2. Delete questions.
-3. Add questions and require that they include question and answer text.
-4. Search for questions based on a text query string.
-5. Play the quiz game, randomizing either all questions or within a specific category.
+### Backend Dependencies
 
-Completing this trivia app will give you the ability to structure plan, implement, and test an API - skills essential for enabling your future applications to communicate with others.
+- Flask
+- SQLAlchemy
 
-## Starting and Submitting the Project
+### Frontent Dependencies
 
-[Fork](https://help.github.com/en/articles/fork-a-repo) the project repository and [clone](https://help.github.com/en/articles/cloning-a-repository) your forked repository to your machine. Work on the project locally and make sure to push all your changes to the remote repository before submitting the link to your repository in the Classroom.
+- React
 
-## About the Stack
+## API Documentation
 
-We started the full stack application for you. It is designed with some key functional areas:
+### Getting started
 
-### Backend
+- The app is run locally, and is not hosted as a base URL. The backend is hosted at the default `http:127.0.0.1:5000/`.
+- No authentication or API keys are required
 
-The [backend](./backend/README.md) directory contains a partially completed Flask and SQLAlchemy server. You will work primarily in `__init__.py` to define your endpoints and can reference models.py for DB and SQLAlchemy setup. These are the files you'd want to edit in the backend:
+### Error Handling
 
-1. `backend/flaskr/__init__.py`
-2. `backend/test_flaskr.py`
+Errors are returned in the following format:
 
-> View the [Backend README](./backend/README.md) for more details.
+```json
+{
+  "code": 404,
+  "description": "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.",
+  "name": "Not Found"
+}
+```
 
-### Frontend
+The following types of errors are returned, depending on the request:
 
-The [frontend](./frontend/README.md) directory contains a complete React frontend to consume the data from the Flask server. If you have prior experience building a frontend application, you should feel free to edit the endpoints as you see fit for the backend you design. If you do not have prior experience building a frontend application, you should read through the frontend code before starting and make notes regarding:
+- 404: Not found
+- 405: Method not allowed
+- 422: Unprocesseable request
 
-1. What are the end points and HTTP methods the frontend is expecting to consume?
-2. How are the requests from the frontend formatted? Are they expecting certain parameters or payloads?
+### Endpoints
 
-Pay special attention to what data the frontend is expecting from each API response to help guide how you format your API. The places where you may change the frontend behavior, and where you should be looking for the above information, are marked with `TODO`. These are the files you'd want to edit in the frontend:
+#### `GET /categories`
 
-1. `frontend/src/components/QuestionView.js`
-2. `frontend/src/components/FormView.js`
-3. `frontend/src/components/QuizView.js`
+Get a list of the categories questions can belong in.
 
-By making notes ahead of time, you will practice the core skill of being able to read and understand code and will have a simple plan to follow to build out the endpoints of your backend API.
+##### Sample
 
-> View the [Frontend README](./frontend/README.md) for more details.
+- Request: `curl -X GET http:127.0.0.1:5000/categories`
+- Response:
+  ```json
+  {
+    "categories": {
+      "1": "Science",
+      "2": "Art",
+      "3": "Geography",
+      "4": "History",
+      "5": "Entertainment",
+      "6": "Sports"
+    }
+  }
+  ```
+
+#### `GET /questions?page={integer}`
+
+Get a list of questions.
+
+##### Query strings
+
+- `page` (integer, optional): Questions are split into pages of 10. Set a value to return the specified page, or the first page if left out.
+
+##### Sample
+
+- Request: `curl -X GET http:127.0.0.1:5000/questions?page=1`
+- Response:
+  ```json
+  {
+  "categories": {
+    "1": "Science",
+    "2": "Art",
+    "3": "Geography",
+    "4": "History",
+    "5": "Entertainment",
+    "6": "Sports"
+  },
+  "current_category": null,
+  "questions": [
+    {
+      "answer": "Apollo 13",
+      "category": 5,
+      "difficulty": 4,
+      "id": 2,
+      "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+    },
+    ...
+  ],
+  "total_questions": 19
+  }
+  ```
+
+#### `DELETE /questions/{question_id}`
+
+Delete the specified question.
+
+##### Sample
+
+- Request: `curl -X DELETE http:127.0.0.1:5000/questions/1`
+- Response: An empty json object will be returned if successful.
+
+#### `POST /questions`
+
+##### Request Body
+
+###### Search
+
+- `SearchTerm` (string, required): Term to search for. The search will be case-insensitive.
+
+```json
+{
+  "searchTerm": "foo"
+}
+```
+
+###### Add a new question
+
+- `question` (string, required): The question to add
+- `answer` (string, required): Answer to the question being added
+- `category` (integer, required): Category the question belongs to
+- `difficulty` (integer, required): Difficulty of the question
+
+```json
+{
+  "question": "What is the largest mammal?",
+  "answer": "Blue whale",
+  "category": 1,
+  "difficulty": 2
+}
+```
+
+##### Query strings
+
+- `page` (integer, optional): Questions are split into pages of 10. Set a value to return the specified page, or the first page if left out.
+
+##### Sample
+
+###### Search
+
+- Request: `curl -X POST http://127.0.0.1:5000/questions -H "Content-Type: application/json" -d '{"searchTerm":"The"}'`
+- Response:
+  ```json
+  {
+  "categories": {
+      "1": "Science",
+      "2": "Art",
+      "3": "Geography",
+      "4": "History",
+      "5": "Entertainment",
+      "6": "Sports"
+  },
+  "current_category": null,
+  "questions": [
+      {
+      "answer": "Maya Angelou",
+      "category": 4,
+      "difficulty": 2,
+      "id": 5,
+      "question": "Whose autobiography is entitled "I Know Why the Caged Bird Sings"?"
+      },
+      ...
+  ],
+  "total_questions": 11
+  }
+  ```
+
+###### Add a new question
+
+- Request: `curl -X POST http://127.0.0.1:5000/questions -H "Content-Type: application/json" -d '{"question": "What is the largest mammal?", "answer": "Blue whale", "category": 1, "difficulty": 2}'`
+- Response:
+  ```json
+  {
+  "categories": {
+      "1": "Science",
+      "2": "Art",
+      "3": "Geography",
+      "4": "History",
+      "5": "Entertainment",
+      "6": "Sports"
+  },
+  "current_category": null,
+  "questions": [
+      {
+      "answer": "Maya Angelou",
+      "category": 4,
+      "difficulty": 2,
+      "id": 5,
+      "question": "Whose autobiography is entitled "I Know Why the Caged Bird Sings"?"
+      },
+      ...
+  ],
+  "total_questions": 11
+  }
+  ```
+
+#### `GET /categories/{category_id}/questions`
+
+Get a list of questions based on the specified category.
+
+##### Query strings
+
+- `page` (integer, optional): Questions are split into pages of 10. Set a value to return the specified page, or the first page if left out.
+
+##### Sample
+
+- Request: `curl -X GET http://127.0.0.1:5000/categories/1/questions`
+- Response:
+  ```json
+  {
+  "categories": {
+      "1": "Science",
+      "2": "Art",
+      "3": "Geography",
+      "4": "History",
+      "5": "Entertainment",
+      "6": "Sports"
+  },
+  "current_category": "Science",
+  "questions": [
+      {
+      "answer": "The Liver",
+      "category": 1,
+      "difficulty": 4,
+      "id": 20,
+      "question": "What is the heaviest organ in the human body?"
+      },
+      ...
+  ],
+  "total_questions": 3
+  }
+  ```
+
+#### `POST /quizzes`
+
+Play the quiz. Returns a single random question belonging to the category.
+
+##### Request body
+
+- `quiz_category` (string, required): The category to pull questions from.
+- `previous_questions` (list of int, required): IDs to remove from pool of possible questions
+
+```json
+{
+  "quiz_category": { "id": "2", "type": "Art" },
+  "previous_questions": [16, 17, 18]
+}
+```
+
+##### Sample
+
+- Request: `curl -X POST http://127.0.0.1:5000/quizzes -H "Content-Type: application/json" -d '{"quiz_category": {"id": "2", "type": "Art"}, "previous_questions": [16, 17, 18]}'`
+- Response:
+  ```json
+  {
+    "question": {
+      "answer": "Jackson Pollock",
+      "category": 2,
+      "difficulty": 2,
+      "id": 19,
+      "question": "Which American artist was a pioneer of Abstract Expressionism, and a leading exponent of action painting?"
+    }
+  }
+  ```

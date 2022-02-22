@@ -99,12 +99,13 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 404)
 
     def test_start_quiz(self):
-        res = self.client().post(
-            '/quizzes',
-            json={'quiz_category': {'id': '2', 'type': 'Art'},
-                  'previous_questions': [16, 17]}
-        )
+        req = {
+            'quiz_category': {'id': '2', 'type': 'Art'},
+            'previous_questions': [16, 17, 18]
+        }
+        res = self.client().post('/quizzes', json=req)
         data = json.loads(res.data)
+
         self.assertEqual(res.status_code, 200)
         self.assertTrue('answer' in data['question'])
         self.assertTrue('category' in data['question'])
@@ -113,12 +114,13 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue('question' in data['question'])
 
     def test_end_quiz(self):
-        res = self.client().post(
-            '/quizzes',
-            json={'quiz_category': {'id': '2', 'type': 'Art'},
-                  'previous_questions': [16, 17, 18, 19]}
-        )
+        req = {
+            'quiz_category': {'id': '2', 'type': 'Art'},
+            'previous_questions': [16, 17, 18, 19]
+        }
+        res = self.client().post('/quizzes', json=req)
         data = json.loads(res.data)
+
         self.assertEqual(res.status_code, 200)
         self.assertFalse(data['question'])
 

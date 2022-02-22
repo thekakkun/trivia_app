@@ -213,6 +213,8 @@ def create_app(test_config=None):
 
             if cat['id'] == '0':
                 questions = Question.query.all()
+            elif int(cat['id']) not in [cat.id for cat in Category.query.all()]:
+                abort(404)
             else:
                 questions = Question.query.filter(
                     Question.category == int(cat['id'])).all()
@@ -224,11 +226,13 @@ def create_app(test_config=None):
             ]
 
             return jsonify({
-                'question': random.choice(new_questions) if new_questions else False
+                'question': ((random.choice(new_questions)
+                              if new_questions
+                              else False))
             })
 
-        except:
-            abort(422)
+        except Exception as e:
+            abort(e.code) if e.code else abort(422)
 
     """
     @TODO:

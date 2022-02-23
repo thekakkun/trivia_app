@@ -208,16 +208,16 @@ def create_app(test_config=None):
         try:
             content = request.json
 
-            cat = content.get('quiz_category')
+            cat_id = content.get('quiz_category')['id']
             shown = content.get('previous_questions')
 
-            if cat['id'] == '0':
+            if cat_id == 0:
                 questions = Question.query.all()
-            elif int(cat['id']) not in [cat.id for cat in Category.query.all()]:
+            elif not Category.query.get(cat_id):
                 abort(404)
             else:
                 questions = Question.query.filter(
-                    Question.category == int(cat['id'])).all()
+                    Question.category == int(cat_id)).all()
 
             new_questions = [
                 q.format()

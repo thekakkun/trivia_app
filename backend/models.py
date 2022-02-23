@@ -4,8 +4,8 @@ import os
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer, String, create_engine
 
-user = 'postgres'
-password = 'abc'
+user = os.getenv('DB_USER')
+password = os.getenv('DB_PASSWORD')
 host = 'localhost'
 port = '5432'
 database_name = 'trivia'

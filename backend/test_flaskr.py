@@ -63,15 +63,29 @@ class TriviaTestCase(unittest.TestCase):
         data = json.loads(res.data)
         self.assertEqual(data['code'], 404)
 
-    def test_add_question(self):
+    def test_add_complete_question(self):
         new_question = {
             'question': 'What is the largest mammal?',
             'answer': 'Blue whale',
             'category': 1,
             'difficulty': 2
         }
+        question_count = Question.query.count()
         res = self.client().post('/questions', json=new_question)
         self.assertEqual(res.status_code, 200)
+        self.assertEqual(Question.query.count(), question_count+1)
+
+    def test_add_incomplete_question(self):
+        new_question = {
+            'question': 'What is the largest mammal?',
+            'answer': 'Blue whale',
+            # 'category': 1,
+            # 'difficulty': 2
+        }
+        question_count = Question.query.count()
+        res = self.client().post('/questions', json=new_question)
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(Question.query.count(), question_count)
 
     def test_delete_question(self):
         questions = Question.query.order_by(Question.id.desc())
